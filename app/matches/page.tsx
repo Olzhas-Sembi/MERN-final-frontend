@@ -6,20 +6,22 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuthStore } from "@/lib/store"
+import { useAuthStore, useIsAuthenticated } from "@/lib/store"
 import { MATCHES_QUERY } from "@/lib/graphql/operations"
 import { formatDistanceToNow } from "date-fns"
 
 export default function MatchesPage() {
   const router = useRouter()
-  const { isAuthenticated, user } = useAuthStore()
+  const isAuthenticated = useIsAuthenticated()
+  const { user } = useAuthStore()
   const { data, loading } = useQuery(MATCHES_QUERY, {
-    skip: !isAuthenticated,
+    skip: isAuthenticated !== true,
     pollInterval: 5000, // Poll every 5 seconds for new matches
   })
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
+    if (isAuthenticated === false) {
       router.push("/auth")
     }
   }, [isAuthenticated, router])

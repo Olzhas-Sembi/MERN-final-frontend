@@ -2,15 +2,16 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuthStore } from "@/lib/store"
+import { useAuthStore, useIsAuthenticated } from "@/lib/store"
 import Link from "next/link"
 
 export default function HomePage() {
   const router = useRouter()
-  const { isAuthenticated } = useAuthStore()
+  const isAuthenticated = useIsAuthenticated()
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
+    if (isAuthenticated === true) {
       router.push("/discover")
     }
   }, [isAuthenticated, router])

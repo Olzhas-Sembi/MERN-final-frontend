@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Heart, MessageCircle, Share, ArrowLeft } from "lucide-react"
-import { useAuthStore } from "@/lib/store"
+import { useAuthStore, useIsAuthenticated } from "@/lib/store"
 import { POST_QUERY, LIKE_POST_MUTATION } from "@/lib/graphql/operations"
 import { useToast } from "@/hooks/use-toast"
 import { formatDistanceToNow } from "date-fns"
@@ -19,13 +19,14 @@ export default function PostPage() {
   const params = useParams()
   const router = useRouter()
   const postId = params.id as string
-  const { isAuthenticated, user } = useAuthStore()
+  const isAuthenticated = useIsAuthenticated()
+  const { user } = useAuthStore()
   const { toast } = useToast()
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
 
   const { data, loading, refetch } = useQuery(POST_QUERY, {
     variables: { id: postId },
-    skip: !isAuthenticated || !postId,
+    skip: isAuthenticated !== true || !postId,
   })
 
   const [likePost] = useMutation(LIKE_POST_MUTATION, {
@@ -36,7 +37,8 @@ export default function PostPage() {
   })
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
+    if (isAuthenticated === false) {
       router.push("/auth")
     }
   }, [isAuthenticated, router])

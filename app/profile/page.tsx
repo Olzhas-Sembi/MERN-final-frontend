@@ -9,16 +9,16 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAuthStore } from "@/lib/store"
+import { useAuthStore, useIsAuthenticated } from "@/lib/store"
 import { ME_QUERY, UPDATE_PROFILE_MUTATION } from "@/lib/graphql/operations"
 import { useToast } from "@/hooks/use-toast"
 import { ImageUpload } from "@/components/upload/image-upload"
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { isAuthenticated } = useAuthStore()
+  const isAuthenticated = useIsAuthenticated()
   const { toast } = useToast()
-  const { data, loading } = useQuery(ME_QUERY, { skip: !isAuthenticated })
+  const { data, loading } = useQuery(ME_QUERY, { skip: isAuthenticated !== true })
   const [updateProfile, { loading: updating }] = useMutation(UPDATE_PROFILE_MUTATION, {
     refetchQueries: [ME_QUERY],
     onCompleted: () => {
@@ -39,7 +39,8 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
+    if (isAuthenticated === false) {
       router.push("/auth")
       return
     }

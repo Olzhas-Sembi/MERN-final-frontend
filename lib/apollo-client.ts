@@ -75,9 +75,12 @@ export const apolloClient = new ApolloClient({
           messages: {
             keyArgs: ["matchId"],
             merge(existing = { messages: [], hasMore: false }, incoming) {
+              // Если это новый запрос (не пагинация), заменяем весь список
+              // Если есть after параметр, это пагинация - добавляем к существующим
+              // Для простоты всегда заменяем, так как мы получаем полный список
               return {
                 ...incoming,
-                messages: [...existing.messages, ...incoming.messages],
+                messages: incoming.messages || [],
               }
             },
           },

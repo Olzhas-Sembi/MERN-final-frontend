@@ -3,15 +3,17 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { useAuthStore } from "@/lib/store"
+import { useAuthStore, useIsAuthenticated } from "@/lib/store"
 import { Heart, MessageSquare, Compass, Home, User, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Navigation() {
   const pathname = usePathname()
-  const { isAuthenticated, logout } = useAuthStore()
+  const isAuthenticated = useIsAuthenticated()
+  const { logout } = useAuthStore()
 
-  if (!isAuthenticated) return null
+  // Не показываем навигацию, если гидратация еще не завершена или пользователь не аутентифицирован
+  if (isAuthenticated !== true) return null
 
   const navItems = [
     { href: "/discover", label: "Поиск", icon: Compass },

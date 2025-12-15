@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Heart, MessageCircle, Share, Plus } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { useAuthStore } from "@/lib/store"
+import { useAuthStore, useIsAuthenticated } from "@/lib/store"
 import { POSTS_QUERY, CREATE_POST_MUTATION, LIKE_POST_MUTATION } from "@/lib/graphql/operations"
 import { useToast } from "@/hooks/use-toast"
 import { formatDistanceToNow } from "date-fns"
@@ -19,7 +19,8 @@ import { ImageViewer } from "@/components/image-viewer"
 
 export default function FeedPage() {
   const router = useRouter()
-  const { isAuthenticated, user } = useAuthStore()
+  const isAuthenticated = useIsAuthenticated()
+  const { user } = useAuthStore()
   const { toast } = useToast()
   const [postContent, setPostContent] = useState("")
   const [postImages, setPostImages] = useState<string[]>([])
@@ -28,7 +29,7 @@ export default function FeedPage() {
 
   const { data, loading, refetch } = useQuery(POSTS_QUERY, {
     variables: { limit: 20, offset: 0 },
-    skip: !isAuthenticated,
+    skip: isAuthenticated !== true,
   })
 
   const [createPost, { loading: creating }] = useMutation(CREATE_POST_MUTATION, {
@@ -58,7 +59,8 @@ export default function FeedPage() {
   })
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
+    if (isAuthenticated === false) {
       router.push("/auth")
     }
   }, [isAuthenticated, router])
