@@ -10,15 +10,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuthStore, useIsAuthenticated } from "@/lib/store"
-import { ME_QUERY, UPDATE_PROFILE_MUTATION } from "@/lib/graphql/operations"
+import { ME_QUERY, UPDATE_PROFILE_MUTATION, POSTS_QUERY } from "@/lib/graphql/operations"
 import { useToast } from "@/hooks/use-toast"
 import { ImageUpload } from "@/components/upload/image-upload"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Heart, MessageCircle } from "lucide-react"
+import Link from "next/link"
+import { formatDistanceToNow } from "date-fns"
+import { ImageViewer } from "@/components/image-viewer"
 
 export default function ProfilePage() {
   const router = useRouter()
   const isAuthenticated = useIsAuthenticated()
+  const { user } = useAuthStore()
   const { toast } = useToast()
   const { data, loading } = useQuery(ME_QUERY, { skip: isAuthenticated !== true })
+  const { data: postsData, loading: postsLoading } = useQuery(POSTS_QUERY, {
+    variables: { limit: 100, offset: 0 },
+    skip: isAuthenticated !== true,
+  })
+  const [selectedPostImages, setSelectedPostImages] = useState<{ images: string[]; index: number } | null>(null)
   const [updateProfile, { loading: updating }] = useMutation(UPDATE_PROFILE_MUTATION, {
     refetchQueries: [ME_QUERY],
     onCompleted: () => {
@@ -107,6 +118,9 @@ export default function ProfilePage() {
     })
   }
 
+  // Фильтруем посты текущего пользователя
+  const myPosts = postsData?.posts?.filter((post: any) => post.authorId === user?.id) || []
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-4 flex items-center justify-center">
@@ -192,7 +206,104 @@ export default function ProfilePage() {
             </form>
           </CardContent>
         </Card>
+
+        {/* Мои посты */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Мои посты</CardTitle>
+            <CardDescription>Посты, которые вы создали</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {postsLoading ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="mt-2 text-sm text-muted-foreground">Загрузка постов...</p>
+              </div>
+            ) : myPosts.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">У вас пока нет постов</p>
+                <Link href="/feed">
+                  <Button variant="outline" className="mt-4">
+                    Создать пост
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {myPosts.map((post: any) => (
+                  <Card key={post.id} className="border">
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={post.author?.profile?.photos?.[0] || "/placeholder-user.jpg"} />
+                          <AvatarFallback>{post.author?.username?.[0] || "U"}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">
+                            {post.author?.profile?.displayName || post.author?.username}
+                          </h3>
+                          <Link href={`/post/${post.id}`}>
+                            <p className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
+                              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                            </p>
+                          </Link>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Link href={`/post/${post.id}`}>
+                        <p className="whitespace-pre-wrap cursor-pointer hover:text-primary transition-colors">
+                          {post.content}
+                        </p>
+                      </Link>
+                      {post.images && post.images.length > 0 && (
+                        <div className={`grid gap-2 ${post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+                          {post.images.map((img: string, idx: number) => (
+                            <div
+                              key={idx}
+                              className="relative rounded-lg overflow-hidden group cursor-pointer"
+                              onClick={() => setSelectedPostImages({ images: post.images, index: idx })}
+                            >
+                              <img
+                                src={img}
+                                alt={`Post image ${idx + 1}`}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-4">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Heart className={`w-4 h-4 ${post.isLiked ? "fill-red-500 text-red-500" : ""}`} />
+                          <span>{post.likesCount}</span>
+                        </div>
+                        <Link href={`/post/${post.id}`}>
+                          <div className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer">
+                            <MessageCircle className="w-4 h-4" />
+                            <span>{post.commentsCount}</span>
+                          </div>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Image Viewer */}
+      {selectedPostImages && (
+        <ImageViewer
+          images={selectedPostImages.images}
+          currentIndex={selectedPostImages.index}
+          isOpen={selectedPostImages !== null}
+          onClose={() => setSelectedPostImages(null)}
+        />
+      )}
     </div>
   )
 }
