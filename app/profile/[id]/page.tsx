@@ -13,6 +13,15 @@ import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 import { ImageViewer } from "@/components/image-viewer"
 
+const translateLookingFor = (value: string): string => {
+  const translations: Record<string, string> = {
+    relationship: "Серьезные отношения",
+    friendship: "Дружба",
+    casual: "Несерьезные отношения",
+  }
+  return translations[value] || value
+}
+
 export default function PublicProfilePage() {
   const params = useParams()
   const router = useRouter()
@@ -77,6 +86,7 @@ export default function PublicProfilePage() {
     )
   }
 
+  // Вычисляем возраст пользователя
   const age = profile.birthDate
     ? new Date().getFullYear() - new Date(profile.birthDate).getFullYear()
     : null
@@ -164,7 +174,7 @@ export default function PublicProfilePage() {
                       key={idx}
                       className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
                     >
-                      {item}
+                      {translateLookingFor(item)}
                     </span>
                   ))}
                 </div>

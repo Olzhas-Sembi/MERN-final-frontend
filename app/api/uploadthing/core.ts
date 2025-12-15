@@ -1,8 +1,5 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next"
 
-// UploadThing автоматически использует переменные окружения:
-// UPLOADTHING_SECRET или UPLOADTHING_TOKEN (секретный ключ)
-// NEXT_PUBLIC_UPLOADTHING_APP_ID (публичный ID приложения)
 const f = createUploadthing()
 
 export const ourFileRouter = {

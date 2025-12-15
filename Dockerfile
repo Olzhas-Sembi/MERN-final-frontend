@@ -2,12 +2,10 @@ FROM node:20-alpine AS base
 
 WORKDIR /app
 
-# Dependencies stage
 FROM base AS deps
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
-# Builder stage
 FROM base AS builder
 ARG NEXT_PUBLIC_UPLOADTHING_APP_ID
 ENV NEXT_PUBLIC_UPLOADTHING_APP_ID=$NEXT_PUBLIC_UPLOADTHING_APP_ID
@@ -15,7 +13,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# Runner stage
 FROM base AS runner
 ENV NODE_ENV=production
 

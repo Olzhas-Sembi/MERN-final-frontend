@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useAuthStore, useIsAuthenticated } from "@/lib/store"
 import { ME_QUERY, UPDATE_PROFILE_MUTATION, POSTS_QUERY } from "@/lib/graphql/operations"
 import { useToast } from "@/hooks/use-toast"
@@ -18,6 +19,12 @@ import { Heart, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { ImageViewer } from "@/components/image-viewer"
+
+const LOOKING_FOR_OPTIONS = [
+  { value: "relationship", label: "Серьезные отношения" },
+  { value: "friendship", label: "Дружба" },
+  { value: "casual", label: "Несерьезные отношения" },
+]
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -184,6 +191,39 @@ export default function ProfilePage() {
                   onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                   maxLength={500}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label>Ищу</Label>
+                <p className="text-xs text-muted-foreground">Выберите, что вы ищете</p>
+                <div className="space-y-2">
+                  {LOOKING_FOR_OPTIONS.map((option) => (
+                    <div key={option.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`lookingFor-${option.value}`}
+                        checked={formData.lookingFor.includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFormData({
+                              ...formData,
+                              lookingFor: [...formData.lookingFor, option.value],
+                            })
+                          } else {
+                            setFormData({
+                              ...formData,
+                              lookingFor: formData.lookingFor.filter((item) => item !== option.value),
+                            })
+                          }
+                        }}
+                      />
+                      <Label
+                        htmlFor={`lookingFor-${option.value}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {option.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Фотографии *</Label>
