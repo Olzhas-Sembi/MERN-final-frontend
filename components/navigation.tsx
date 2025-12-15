@@ -4,15 +4,15 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useAuthStore, useIsAuthenticated } from "@/lib/store"
-import { Heart, MessageSquare, Compass, Home, User, LogOut } from "lucide-react"
+import { Heart, MessageSquare, Compass, Home, User, LogOut, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Navigation() {
   const pathname = usePathname()
   const isAuthenticated = useIsAuthenticated()
-  const { logout } = useAuthStore()
+  const { logout, user } = useAuthStore()
+  const isAdmin = user?.roles?.includes("admin")
 
-  // Не показываем навигацию, если гидратация еще не завершена или пользователь не аутентифицирован
   if (isAuthenticated !== true) return null
 
   const navItems = [
@@ -21,6 +21,10 @@ export function Navigation() {
     { href: "/feed", label: "Лента", icon: Home },
     { href: "/profile", label: "Профиль", icon: User },
   ]
+
+  if (isAdmin) {
+    navItems.push({ href: "/admin", label: "Админ", icon: Shield })
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">

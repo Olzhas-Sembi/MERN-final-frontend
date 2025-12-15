@@ -13,18 +13,15 @@ function getAuthToken(): string | null {
       return parsed.state?.token || null
     }
   } catch {
-    // Ignore parsing errors
   }
   return null
 }
 
-// HTTP link for queries and mutations
 const httpLink = new HttpLink({
   uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:4000/graphql",
   credentials: "include",
 })
 
-// WebSocket link for subscriptions
 const wsLink =
   typeof window !== "undefined"
     ? new GraphQLWsLink(
@@ -40,7 +37,6 @@ const wsLink =
       )
     : null
 
-// Auth middleware
 const authMiddleware = new ApolloLink((operation, forward) => {
   const token = getAuthToken()
 
@@ -53,7 +49,6 @@ const authMiddleware = new ApolloLink((operation, forward) => {
   return forward(operation)
 })
 
-// Split link based on operation type
 const splitLink =
   typeof window !== "undefined" && wsLink
     ? split(
@@ -75,9 +70,6 @@ export const apolloClient = new ApolloClient({
           messages: {
             keyArgs: ["matchId"],
             merge(existing = { messages: [], hasMore: false }, incoming) {
-              // Если это новый запрос (не пагинация), заменяем весь список
-              // Если есть after параметр, это пагинация - добавляем к существующим
-              // Для простоты всегда заменяем, так как мы получаем полный список
               return {
                 ...incoming,
                 messages: incoming.messages || [],
@@ -94,7 +86,6 @@ export const apolloClient = new ApolloClient({
       Profile: {
         keyFields: ["id"],
         merge(existing, incoming, { mergeObjects }) {
-          // If incoming doesn't have id but has userId, use userId as fallback
           if (!incoming.id && incoming.userId) {
             incoming.id = incoming.userId
           }

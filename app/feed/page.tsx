@@ -59,7 +59,6 @@ export default function FeedPage() {
   })
 
   useEffect(() => {
-    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
     if (isAuthenticated === false) {
       router.push("/auth")
     }
@@ -92,7 +91,6 @@ export default function FeedPage() {
         url: url,
       })
     } catch (error) {
-      // Fallback to copy
       await navigator.clipboard.writeText(url)
       toast({ title: "Ссылка скопирована!", description: "Ссылка на пост скопирована в буфер обмена." })
     }
@@ -144,7 +142,6 @@ export default function FeedPage() {
           </Dialog>
         </div>
 
-        {/* Posts */}
         {posts.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
@@ -225,7 +222,6 @@ export default function FeedPage() {
         )}
       </div>
 
-      {/* Image Viewer */}
       {selectedPostImages && (
         <ImageViewer
           images={selectedPostImages.images}

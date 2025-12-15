@@ -1,7 +1,6 @@
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 
-// Types
 export interface User {
   id: string
   username: string
@@ -62,7 +61,6 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => {
-      // Проверяем localStorage при инициализации
       let initialHydrated = false
       if (typeof window !== "undefined") {
         try {
@@ -71,7 +69,6 @@ export const useAuthStore = create<AuthState>()(
             initialHydrated = true
           }
         } catch {
-          // Игнорируем ошибки
         }
       }
 
@@ -94,7 +91,6 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
-        // _hasHydrated не сохраняется в localStorage
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true)
@@ -103,20 +99,16 @@ export const useAuthStore = create<AuthState>()(
   ),
 )
 
-// Selector для isAuthenticated, который учитывает гидратацию
-// Возвращает false до завершения гидратации, чтобы избежать редиректов при перезагрузке
 export const useIsAuthenticated = () => {
   const { _hasHydrated, token, user } = useAuthStore()
-  if (!_hasHydrated) return null // null означает, что гидратация еще не завершена
+  if (!_hasHydrated) return null
   return !!(token && user)
 }
 
-// Хук для проверки, завершена ли гидратация
 export const useHasHydrated = () => {
   return useAuthStore((state) => state._hasHydrated)
 }
 
-// UI Store
 interface UIState {
   theme: "light" | "dark"
   genderTheme: "female" | "male"
@@ -140,7 +132,6 @@ export const useUIStore = create<UIState>()(
   ),
 )
 
-// Chat Store
 interface ChatState {
   activeMatchId: string | null
   setActiveMatch: (matchId: string | null) => void

@@ -10,7 +10,6 @@ export default function HomePage() {
   const isAuthenticated = useIsAuthenticated()
 
   useEffect(() => {
-    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
     if (isAuthenticated === true) {
       router.push("/discover")
     }

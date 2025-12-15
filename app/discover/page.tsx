@@ -61,7 +61,7 @@ export default function DiscoverPage() {
         description: error.message || "Не удалось отправить лайк", 
         variant: "destructive" 
       })
-      handleSwipe("right") // Still move to next profile on error
+      handleSwipe("right")
     },
   })
 
@@ -76,12 +76,11 @@ export default function DiscoverPage() {
         description: error.message || "Не удалось отправить дизлайк", 
         variant: "destructive" 
       })
-      handleSwipe("left") // Still move to next profile on error
+      handleSwipe("left")
     },
   })
 
   useEffect(() => {
-    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
     if (isAuthenticated === false) {
       router.push("/auth")
     }
@@ -329,10 +328,8 @@ export default function DiscoverPage() {
                           const diff = startX - touch.clientX
                           if (Math.abs(diff) > 50) {
                             if (diff > 0 && currentProfile.photos.length > 1) {
-                              // Swipe left - next photo
                               setSelectedImageIndex(1)
                             } else if (diff < 0 && currentProfile.photos.length > 1) {
-                              // Swipe right - previous photo
                               setSelectedImageIndex(currentProfile.photos.length - 1)
                             }
                           }

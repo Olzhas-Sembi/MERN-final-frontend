@@ -37,7 +37,6 @@ export default function PostPage() {
   })
 
   useEffect(() => {
-    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
     if (isAuthenticated === false) {
       router.push("/auth")
     }
@@ -158,7 +157,6 @@ export default function PostPage() {
         </Card>
       </div>
 
-      {/* Image Viewer */}
       {post.images && selectedImageIndex !== null && (
         <ImageViewer
           images={post.images}

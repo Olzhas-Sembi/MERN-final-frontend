@@ -8,7 +8,6 @@ const f = createUploadthing()
 export const ourFileRouter = {
   imageUploader: f({ image: { maxFileSize: "4MB", maxFileCount: 6 } })
     .middleware(async (req) => {
-      // Проверяем наличие переменных окружения
       const secret = process.env.UPLOADTHING_SECRET || process.env.UPLOADTHING_TOKEN || process.env.SECRET_KEY
       
       if (!secret) {

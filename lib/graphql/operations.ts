@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client"
 
-// Auth Mutations
 export const SIGN_UP_MUTATION = gql`
   mutation SignUp($input: SignUpInput!) {
     signUp(input: $input) {
@@ -36,7 +35,6 @@ export const SIGN_IN_MUTATION = gql`
   }
 `
 
-// Profile Queries and Mutations
 export const USER_QUERY = gql`
   query User($id: ID!) {
     user(id: $id) {
@@ -135,7 +133,6 @@ export const UPDATE_PROFILE_MUTATION = gql`
   }
 `
 
-// Match Queries and Mutations
 export const MATCHES_QUERY = gql`
   query Matches {
     matches {
@@ -196,7 +193,6 @@ export const MATCH_QUERY = gql`
   }
 `
 
-// Message Queries, Mutations, and Subscriptions
 export const MESSAGES_QUERY = gql`
   query Messages($matchId: ID!, $after: ID) {
     messages(matchId: $matchId, after: $after) {
@@ -280,7 +276,6 @@ export const MESSAGE_ADDED_SUBSCRIPTION = gql`
   }
 `
 
-// Post Queries and Mutations
 export const POSTS_QUERY = gql`
   query Posts($limit: Int, $offset: Int) {
     posts(limit: $limit, offset: $offset) {
@@ -368,6 +363,34 @@ export const LIKE_POST_MUTATION = gql`
     likePost(postId: $postId) {
       id
       likesCount
+    }
+  }
+`
+
+export const ADMIN_STATS_QUERY = gql`
+  query AdminStats {
+    adminStats {
+      totalUsers
+      totalProfiles
+      totalPosts
+      totalMatches
+      totalMessages
+      usersByRole {
+        role
+        count
+      }
+      likesByUser {
+        userId
+        username
+        likesGiven
+        likesReceived
+      }
+      postsByUser {
+        userId
+        username
+        postsCount
+        totalLikes
+      }
     }
   }
 `

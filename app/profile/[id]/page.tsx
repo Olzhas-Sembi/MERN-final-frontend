@@ -47,7 +47,6 @@ export default function PublicProfilePage() {
   })
 
   useEffect(() => {
-    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
     if (isAuthenticated === false) {
       router.push("/auth")
     }
@@ -97,14 +96,12 @@ export default function PublicProfilePage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="max-w-2xl mx-auto p-4 space-y-6">
-        {/* Header */}
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => router.back()}>
             ← Назад
           </Button>
         </div>
 
-        {/* Main Photo */}
         {profile.photos && profile.photos.length > 0 && (
           <Card className="overflow-hidden cursor-pointer" onClick={() => handleImageClick(0)}>
             <div className="aspect-[3/4] relative group">
@@ -120,7 +117,6 @@ export default function PublicProfilePage() {
           </Card>
         )}
 
-        {/* Profile Info */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">

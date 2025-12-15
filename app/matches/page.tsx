@@ -16,11 +16,10 @@ export default function MatchesPage() {
   const { user } = useAuthStore()
   const { data, loading } = useQuery(MATCHES_QUERY, {
     skip: isAuthenticated !== true,
-    pollInterval: 5000, // Poll every 5 seconds for new matches
+    pollInterval: 5000,
   })
 
   useEffect(() => {
-    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
     if (isAuthenticated === false) {
       router.push("/auth")
     }
@@ -39,7 +38,6 @@ export default function MatchesPage() {
 
   const matches = data?.matches || []
 
-  // Get the other participant from each match
   const matchesWithOtherUser = matches
     .filter((match: any) => match.status === "matched")
     .map((match: any) => {
@@ -49,7 +47,7 @@ export default function MatchesPage() {
         otherUser,
       }
     })
-    .filter((match: any) => match.otherUser) // Filter out matches without otherUser
+    .filter((match: any) => match.otherUser)
 
   if (matchesWithOtherUser.length === 0) {
     return (

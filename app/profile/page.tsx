@@ -50,7 +50,6 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
-    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
     if (isAuthenticated === false) {
       router.push("/auth")
       return
@@ -74,7 +73,6 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Валидация: нужно хотя бы одно фото
     if (!formData.photos || formData.photos.length === 0) {
       toast({
         title: "Ошибка",
@@ -84,7 +82,6 @@ export default function ProfilePage() {
       return
     }
 
-    // Валидация: нужна дата рождения
     if (!formData.birthDate) {
       toast({
         title: "Ошибка",
@@ -94,10 +91,8 @@ export default function ProfilePage() {
       return
     }
 
-    // Преобразуем дату в ISO строку для GraphQL
     let birthDateISO: string | undefined
     if (formData.birthDate) {
-      // Если дата в формате YYYY-MM-DD, преобразуем в ISO
       const date = new Date(formData.birthDate + 'T00:00:00')
       if (!isNaN(date.getTime())) {
         birthDateISO = date.toISOString()
@@ -118,7 +113,6 @@ export default function ProfilePage() {
     })
   }
 
-  // Фильтруем посты текущего пользователя
   const myPosts = postsData?.posts?.filter((post: any) => post.authorId === user?.id) || []
 
   if (loading) {
@@ -207,7 +201,6 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Мои посты */}
         <Card>
           <CardHeader>
             <CardTitle>Мои посты</CardTitle>
@@ -295,7 +288,6 @@ export default function ProfilePage() {
         </Card>
       </div>
 
-      {/* Image Viewer */}
       {selectedPostImages && (
         <ImageViewer
           images={selectedPostImages.images}

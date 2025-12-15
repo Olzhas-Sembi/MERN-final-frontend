@@ -44,13 +44,11 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Get match info to find other user
   const { data: matchData } = useQuery(MATCH_QUERY, {
     variables: { id: matchId },
     skip: isAuthenticated !== true || !matchId,
   })
 
-  // Загружаем сообщения при монтировании
   const { data, loading, refetch } = useQuery(MESSAGES_QUERY, {
     variables: { matchId },
     skip: isAuthenticated !== true || !matchId,
@@ -73,18 +71,15 @@ export default function ChatPage() {
     },
   })
 
-  // Subscribe to new messages
   const { data: subscriptionData } = useSubscription(MESSAGE_ADDED_SUBSCRIPTION, {
     variables: { matchId },
     skip: isAuthenticated !== true || !matchId,
   })
 
-  // Обрабатываем новые сообщения из subscription
   useEffect(() => {
     if (subscriptionData?.messageAdded && subscriptionData.messageAdded.matchId === matchId) {
       const newMessage = subscriptionData.messageAdded
       setMessages((prev) => {
-        // Проверяем, нет ли уже этого сообщения
         const exists = prev.some((msg) => msg.id === newMessage.id)
         if (exists) return prev
         return [...prev, newMessage]
@@ -93,26 +88,21 @@ export default function ChatPage() {
   }, [subscriptionData?.messageAdded, matchId])
 
   useEffect(() => {
-    // Не делаем редирект, если гидратация еще не завершена (isAuthenticated === null)
     if (isAuthenticated === false) {
       router.push("/auth")
     }
   }, [isAuthenticated, router])
 
-  // Get other user from match participants
   const otherUser = useMemo(() => {
     if (!matchData?.match?.participants || !user) return null
     return matchData.match.participants.find((p: any) => p.id !== user.id) || null
   }, [matchData, user])
 
-  // Группируем сообщения для отображения
   const groupedMessages = useMemo(() => {
-    // Сортируем по времени
     const sortedMessages = [...messages].sort((a, b) => {
       return new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
     })
 
-    // Добавляем метаданные для группировки
     return sortedMessages.map((msg, index) => {
       const prevMsg = index > 0 ? sortedMessages[index - 1] : null
       const nextMsg = index < sortedMessages.length - 1 ? sortedMessages[index + 1] : null
@@ -120,12 +110,12 @@ export default function ChatPage() {
       const isFirstInGroup = 
         !prevMsg || 
         prevMsg.senderId !== msg.senderId ||
-        (new Date(msg.sentAt).getTime() - new Date(prevMsg.sentAt).getTime()) > 5 * 60 * 1000 // 5 minutes
+        (new Date(msg.sentAt).getTime() - new Date(prevMsg.sentAt).getTime()) > 5 * 60 * 1000
       
       const isLastInGroup =
         !nextMsg ||
         nextMsg.senderId !== msg.senderId ||
-        (new Date(nextMsg.sentAt).getTime() - new Date(msg.sentAt).getTime()) > 5 * 60 * 1000 // 5 minutes
+        (new Date(nextMsg.sentAt).getTime() - new Date(msg.sentAt).getTime()) > 5 * 60 * 1000
 
       return {
         ...msg,
@@ -135,7 +125,6 @@ export default function ChatPage() {
     })
   }, [messages])
 
-  // Скролл к концу сообщений
   useEffect(() => {
     if (messagesEndRef.current && messages.length > 0) {
       const container = messagesEndRef.current.parentElement
@@ -143,7 +132,6 @@ export default function ChatPage() {
         const isNearBottom = 
           container.scrollHeight - container.scrollTop - container.clientHeight < 150
         
-        // Скроллим только если пользователь уже был внизу
         if (isNearBottom) {
           requestAnimationFrame(() => {
             messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -158,7 +146,7 @@ export default function ChatPage() {
     if (!messageText.trim() || sending) return
 
     const textToSend = messageText.trim()
-    setMessageText("") // Очищаем инпут сразу
+    setMessageText("")
 
     try {
       const result = await sendMessage({
@@ -168,18 +156,15 @@ export default function ChatPage() {
         },
       })
 
-      // Добавляем сообщение в локальное состояние сразу после отправки
       if (result.data?.sendMessage) {
         const newMessage = result.data.sendMessage
         setMessages((prev) => {
-          // Проверяем, нет ли уже этого сообщения
           const exists = prev.some((msg) => msg.id === newMessage.id)
           if (exists) return prev
           return [...prev, newMessage]
         })
       }
     } catch (error) {
-      // Восстанавливаем текст при ошибке
       setMessageText(textToSend)
     }
   }
@@ -199,7 +184,6 @@ export default function ChatPage() {
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
-      {/* Chat Header */}
       <div className="border-b p-4 bg-background/95 backdrop-blur flex-shrink-0 z-10">
         <div className="flex items-center gap-3 max-w-2xl mx-auto">
           <Link href={`/profile/${otherUser?.id}`}>
@@ -217,7 +201,6 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 max-w-2xl mx-auto w-full min-h-0">
         {groupedMessages.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
@@ -278,7 +261,6 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input */}
       <div className="border-t p-4 bg-background flex-shrink-0 z-10 shadow-lg pb-20">
         <form onSubmit={handleSend} className="flex gap-2 max-w-2xl mx-auto">
           <Input
